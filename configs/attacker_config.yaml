@@ -1,0 +1,14 @@
+attacker:
+  name: "PAIR"
+  strategy: "iterative_refinement"
+  max_queries: 20
+  parallel: true
+  use_chain_of_thought: true
+  temperature: 0.7
+  top_p: 0.9
+  seed_prompts_path: "data/prompts/seed_prompts.txt"
+  output_jailbreaks_path: "data/jailbreaks/generated_jailbreaks.jsonl"
+  log_path: "data/logs/"
+  evaluation:
+    enable_safety_check: true
+    enable_transferability_check: true

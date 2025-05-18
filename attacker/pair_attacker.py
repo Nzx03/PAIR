@@ -1,3 +1,4 @@
+
 import random
 from attacker.attacker_base import BaseAttacker
 from attacker.utils import mutate_prompt
