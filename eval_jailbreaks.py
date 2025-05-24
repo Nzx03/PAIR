@@ -10,7 +10,7 @@ def load_results(path):
         return [json.loads(line) for line in f]
 
 def main():
-    results = load_results("data/jailbreaks/generated_jailbreaks.jsonl")
+    results = load_results("data\jailbreaks.jsonl")
 
     success_count = 0
     fluency_scores = []
