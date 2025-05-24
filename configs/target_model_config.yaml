@@ -1,6 +1,6 @@
 target_model:
   name: "gpt-3.5"
-  provider: "openai"
+  model_type: "openai"
   model_id: "gpt-3.5-turbo"
   temperature: 0.2
   max_tokens: 512

@@ -12,6 +12,12 @@ from evaluator import SafetyClassifier
 def load_config(path):                                                                           
     with open(path, 'r') as f:
         return yaml.safe_load(f)
+    
+def load_seed_prompts(filepath="data/prompts/seeds.txt"):
+    with open(filepath, "r") as f:
+        prompts = [line.strip() for line in f if line.strip()]
+    return prompts
+
 
 def main():
     attacker_config = load_config("configs/attacker_config.yaml")
@@ -20,11 +26,16 @@ def main():
     target_model = get_model(model_config["target_model"])
     safety = SafetyClassifier(api_key=model_config["target_model"].get("api_key"))
 
-    # pair = PAIRAttacker(config=attacker_config["attacker"],
-    #                     target_model=target_model,
-    #                     safety_classifier=safety)
-    
-    # pair.run()
+    seed_prompts = load_seed_prompts() 
+
+    pair = PAIRAttacker(
+    target_model=target_model,
+    seed_prompts=seed_prompts,
+    max_iters=attacker_config["attacker"].get("max_iters", 20)
+    )
+
+    successful_jailbreaks = pair.run()
+    print(f"Found {len(successful_jailbreaks)} successful jailbreak(s).")
 
 if __name__ == "__main__":
     main()
