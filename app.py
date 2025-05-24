@@ -1,54 +1,49 @@
 import streamlit as st
+import subprocess
 import json
-from evaluator.metrics import (
-    evaluate_jailbreak_success,
-    evaluate_fluency,
-    evaluate_transferability
-)
+import os
+from evaluator.metrics import evaluate_jailbreak_success, evaluate_fluency
 
-# Load results (jsonl file: one JSON object per line)
-def load_results(path):
-    results = []
-    with open(path, 'r') as f:
-        for line in f:
-            if line.strip():
-                results.append(json.loads(line))
-    return results
+st.set_page_config(page_title="PAIR Jailbreak Evaluator", layout="wide")
+st.title("🔐 PAIR – Adversarial Prompt Generator & Evaluator")
 
-def main():
-    st.title("Jailbreak Evaluation Dashboard")
+# Step 1: Run PAIR Attack
+st.header("⚔️ 1. Generate Jailbreak Prompts")
+config_path = st.text_input("Path to Attacker Config File", value="configs/attacker_config.yaml")
 
-    # File path or upload
-    file_path = st.text_input("Enter path to jailbreaks JSONL file", 
-                             value=r"C:\Users\Nazneen\git\PAIR\data\jailbreaks\jailbreaks.jsonl")
-
-    if st.button("Load and Evaluate"):
+if st.button("Run PAIR Attack"):
+    with st.spinner("Running attack..."):
         try:
-            results = load_results(file_path)
-            if not results:
-                st.warning("No data found in the file!")
-                return
+            subprocess.run(["python", "run_pair.py", "--config", config_path], check=True)
+            st.success("Attack completed successfully.")
+        except subprocess.CalledProcessError as e:
+            st.error("Attack script failed.")
+            st.exception(e)
 
-            success_count = 0
-            fluency_scores = []
-            for entry in results:
-                output = entry.get("response", "")  # Adjust if your key is different
-                if evaluate_jailbreak_success(output):
-                    success_count += 1
-                fluency_scores.append(evaluate_fluency(output))
+# Step 2: Evaluate Results
+st.header("📊 2. Evaluate Jailbreak Results")
+jailbreak_file = st.text_input("Path to generated .jsonl results file", value="data/jailbreaks/jailbreaks.jsonl")
 
-            st.write(f"**Total Samples:** {len(results)}")
-            st.write(f"**Jailbreak Success Rate:** {success_count / len(results):.2%}")
-            st.write(f"**Average Fluency Score:** {sum(fluency_scores) / len(fluency_scores):.2f}")
+if st.button("Run Evaluation"):
+    if not os.path.exists(jailbreak_file):
+        st.error(f"File not found: {jailbreak_file}")
+    else:
+        with open(jailbreak_file, 'r') as f:
+            results = [json.loads(line) for line in f if line.strip()]
 
-            # Show table of results
-            st.subheader("Jailbreak Attempts")
-            for i, entry in enumerate(results):
-                with st.expander(f"Attempt #{i+1} - Seed: {entry.get('seed_prompt', 'N/A')}"):
-                    st.json(entry)
+        success_count = 0
+        fluency_scores = []
 
-        except Exception as e:
-            st.error(f"Error loading or evaluating data: {e}")
+        for entry in results:
+            output = entry.get("response", "")
+            if evaluate_jailbreak_success(output):
+                success_count += 1
+            fluency_scores.append(evaluate_fluency(output))
 
-if __name__ == "__main__":
-    main()
+        st.metric("✅ Jailbreak Success Rate", f"{success_count / len(results):.2%}")
+        st.metric("🗣️ Average Fluency Score", f"{sum(fluency_scores) / len(fluency_scores):.2f}")
+
+        st.subheader("📄 Sample Outputs")
+        for i, entry in enumerate(results[:5]):
+            st.markdown(f"**Prompt {i+1}:** `{entry.get('final_prompt')}`")
+            st.code(entry.get("response", "No response"))
