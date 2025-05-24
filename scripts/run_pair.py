@@ -1,5 +1,5 @@
 import yaml
-from attacker.pair import PAIRAttacker
+from attacker import PAIRAttacker
 from target_models import get_model
 from evaluator import SafetyClassifier
 
