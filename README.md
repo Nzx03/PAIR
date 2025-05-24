@@ -25,10 +25,10 @@ This project implements **PAIR (Prompt Automatic Iterative Refinement)** to gene
 
 2. **Run PAIR attack:**
     ```bash
-  python run_pair.py --config configs/attacker_config.yaml
+    python run_pair.py --config configs/attacker_config.yaml
     ```
 
-3. **Evaluate jailbreaks:**
+3. **Evaluate generated jailbreak prompts**
     ```bash
     python eval_jailbreaks.py
     ```
