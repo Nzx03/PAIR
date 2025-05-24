@@ -25,12 +25,17 @@ This project implements **PAIR (Prompt Automatic Iterative Refinement)** to gene
 
 2. **Run PAIR attack:**
     ```bash
-    python scripts/run_pair.py --config configs/attacker_config.yaml
+  python run_pair.py --config configs/attacker_config.yaml
     ```
 
 3. **Evaluate jailbreaks:**
     ```bash
-    python scripts/eval_jailbreaks.py
+    python eval_jailbreaks.py
+    ```
+
+4. **Launch the Streamlit Dashboard**
+    ```bash
+    streamlit run app.py
     ```
 
 ---
